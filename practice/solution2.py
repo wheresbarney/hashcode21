@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# to generate output files (in zsh):
+# for f in practice/data/*; do echo $f; python3.8 practice/solution2.py $f > practice/output/$f:t:r.out; done
+
 import collections
 import sys
 
@@ -9,6 +12,9 @@ with open(sys.argv[1]) as f:
     pizzas = []
     for i in range(m):
         pizzas.append((i, frozenset(f.readline().split()[1:])))
+
+# Sort pizzas by most toppings: if we have more pizzas than orders, want to use the biggest ones first
+pizzas.sort(key=lambda pizza: len(pizza[1]))
 
 open_orders = collections.deque()
 completed_orders = []
@@ -34,6 +40,10 @@ for pizza_id, toppings in pizzas:
         if num_new_toppings == len(toppings):
             # not going to find anywhere better than here
             break
+
+    if not best_order:
+        # couldn't find any order to take this pizza
+        break
 
     # print(f'{best_order=}')
     best_order[1].append(pizza_id)
