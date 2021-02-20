@@ -30,7 +30,8 @@ for pizza_id, toppings in pizzas:
     best_new_toppings = -1
     for order in open_orders:
         order_size, ids, existing_toppings = order
-        num_new_toppings = len(existing_toppings - toppings)
+        num_new_toppings = len(toppings - existing_toppings)
+        # print(f'{toppings=}, {existing_toppings=}, {num_new_toppings=}')
 
         if num_new_toppings > best_new_toppings:
             best_new_toppings = num_new_toppings
@@ -53,8 +54,10 @@ for pizza_id, toppings in pizzas:
     else:
         best_order[2].update(toppings)
 
-# Finally, compress partially-completed orders
+# print(f'{completed_orders=}')
+# print(f'{open_orders=}')
 
+# Finally, compress partially-completed orders
 # First, delete trailing completely empty orders
 while True:
     if not open_orders:
@@ -65,6 +68,7 @@ while True:
         # not actually empty. Put it back, and end loop
         open_orders.append(empty_order)
         break
+    # print(f'popped {empty_order=}')
 
 # Now fill leading orders with trailing orders
 giver = None
@@ -75,14 +79,19 @@ while True:
     taker = open_orders.popleft()
 
     while True:
-        if not giver:
+        if not giver or not giver[1]:
+            # no giver, or giver is exhausted
+            if not open_orders:
+                # no more givers left
+                break
             giver = open_orders.pop()
+
+        # print(f'donating to {taker=} from {giver=}')
         taker[1].append(giver[1].pop())
-        if not giver[1]:
-            # Have emptied this order
-            giver = None
-        if taker[1] == taker[0]:
-            # Have completed this order
+
+        if len(taker[1]) == taker[0]:
+            # Have completed the taker order
+            completed_orders.append([taker[0]] + taker[1])
             break
 
 print(len(completed_orders))
